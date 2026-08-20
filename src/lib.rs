@@ -1,1 +1,1 @@
-mod analyzer;
+pub mod analyzer;

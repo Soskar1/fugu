@@ -4,14 +4,14 @@ use std::path::PathBuf;
 pub fn analyze(path: PathBuf) -> u64 {
     let metadata = fs::metadata(&path).unwrap();
     let mut size = metadata.len();
-    
+
     if path.is_dir() {
         for entry in fs::read_dir(path).unwrap() {
             size += analyze(entry.unwrap().path().to_path_buf());
         }
     }
-    
-    return size;
+
+    size
 }
 
 #[cfg(test)]
