@@ -1,17 +1,19 @@
 use std::fs;
 use std::path::PathBuf;
+use crate::analyzer::file_system_node::{FileSystemNode, NodeType};
 
-pub fn analyze(path: PathBuf) -> u64 {
+pub fn analyze(path: PathBuf) -> FileSystemNode {
     let metadata = fs::metadata(&path).unwrap();
-    let mut size = metadata.len();
+    // let mut size = metadata.len();
+    // 
+    // if path.is_dir() {
+    //     for entry in fs::read_dir(path).unwrap() {
+    //         size += analyze(entry.unwrap().path().to_path_buf());
+    //     }
+    // }
 
-    if path.is_dir() {
-        for entry in fs::read_dir(path).unwrap() {
-            size += analyze(entry.unwrap().path().to_path_buf());
-        }
-    }
-
-    size
+    //size
+    FileSystemNode::new("asdf", 1, NodeType::File)
 }
 
 #[cfg(test)]
@@ -20,6 +22,7 @@ mod tests {
     use rstest::rstest;
     use tempfile::{tempdir, NamedTempFile};
     use crate::analyzer::file_system_analyzer::analyze;
+    use crate::analyzer::file_system_node::NodeType;
 
     #[rstest]
     #[case("Hello", 5)]
@@ -30,10 +33,11 @@ mod tests {
         fs::write(&file.path(), content).unwrap();
 
         // Act
-        let result = analyze(file.path().to_path_buf());
+        let node = analyze(file.path().to_path_buf());
 
         // Assert
-        assert_eq!(result, expected);
+        assert_eq!(node.node_type(), NodeType::File);
+        assert_eq!(node.size(), expected);
     }
 
     #[test]
@@ -42,10 +46,10 @@ mod tests {
         let directory = tempdir().unwrap();
 
         // Act
-        let result = analyze(directory.path().to_path_buf());
+        let node = analyze(directory.path().to_path_buf());
 
         // Assert
-        assert_eq!(result, 0);
+        assert_eq!(node.size(), 0);
     }
 
     #[test]
@@ -58,9 +62,10 @@ mod tests {
         fs::write(&file_with_contents.path(), "Hello, World!").unwrap();
 
         // Act
-        let result = analyze(directory.path().to_path_buf());
+        let node = analyze(directory.path().to_path_buf());
 
         // Assert
-        assert_eq!(result, 13);
+        assert_eq!(node.node_type(), NodeType::Directory);
+        assert_eq!(node.size(), 13);
     }
 }

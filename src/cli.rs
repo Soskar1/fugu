@@ -10,7 +10,34 @@ struct Args {
 
 pub fn run() {
     let args = Args::parse();
+    run_internal(args);
+}
+
+fn run_internal(args: Args) {
+    if args.path.is_file() {
+        panic!("File paths are not allowed");
+    }
     
     let size = analyze(args.path);
-    println!("{}", size);
+    //println!("{}", size);
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+    use tempfile::NamedTempFile;
+    use super::*;
+
+    #[test]
+    #[should_panic]
+    fn panic_on_file() {
+        // Arrange
+        let file = NamedTempFile::new().unwrap();
+        let args = Args {
+            path: PathBuf::from(file.path())
+        };
+
+        // Act & Assert
+        run_internal(args);
+    }
 }

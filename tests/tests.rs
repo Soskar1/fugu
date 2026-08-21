@@ -1,6 +1,6 @@
 use std::fs;
 use assert_cmd::Command;
-use tempfile::{tempdir, NamedTempFile};
+use tempfile::{tempdir};
 
 const FUGU: &str = "fugu";
 
@@ -16,8 +16,8 @@ fn fugu_prints_file_name_and_size_in_bytes() {
 
     // Act & Assert
     command
-        .arg(&file)
+        .arg(directory.path())
         .assert()
         .success()
-        .stdout("hello.txt   13B\n");
+        .stdout("./ 13B\n\thello.txt 13B\n");
 }
