@@ -1,4 +1,4 @@
-use std::fs;
+use std::{cmp::Reverse, fs};
 use std::path::PathBuf;
 use crate::analyzer::file_system_node::{FileSystemNode, NodeType};
 
@@ -31,6 +31,8 @@ pub fn analyze(path: PathBuf) -> FileSystemNode {
 
             nodes.push(subfile_node);
         }
+
+        nodes.sort_by_key(|node| Reverse(node.size()));
 
         FileSystemNode::new_directory(file_name, size, nodes)
     } else {
@@ -163,5 +165,27 @@ mod tests {
         assert_eq!(Some(&FileSystemNode::new_file("f.txt", 0)), item);
         let item = sub_directory.iter().find(|&x| x.node_name() == "a.txt");
         assert_eq!(None, item);
+    }
+
+    #[test]
+    fn analyze_sorts_by_size_descending_order() {
+        // Arrange
+        let directory = tempdir().unwrap();
+        fs::write(directory.path().join("a.txt"), "55555").unwrap();
+        fs::write(directory.path().join("b.txt"), "4444").unwrap();
+        fs::write(directory.path().join("c.txt"), "666666").unwrap();
+        fs::write(directory.path().join("d.txt"), "1").unwrap();
+        fs::write(directory.path().join("e.txt"), "7777777").unwrap();
+
+        // Act
+        let node = analyze(directory.path().to_path_buf());
+
+        // Assert
+        let mut iterator = node.iter();
+        assert_eq!(Some(&FileSystemNode::new_file("e.txt", 7)), iterator.next());
+        assert_eq!(Some(&FileSystemNode::new_file("c.txt", 6)), iterator.next());
+        assert_eq!(Some(&FileSystemNode::new_file("a.txt", 5)), iterator.next());
+        assert_eq!(Some(&FileSystemNode::new_file("b.txt", 4)), iterator.next());
+        assert_eq!(Some(&FileSystemNode::new_file("d.txt", 1)), iterator.next());
     }
 }
