@@ -4,7 +4,11 @@ use crate::analyzer::file_system_node::{FileSystemNode, NodeType};
 
 pub fn analyze(path: PathBuf) -> FileSystemNode {
     let metadata = fs::metadata(&path).unwrap();
-    let file_name = path.file_name().unwrap().to_str().unwrap();
+
+    let file_name = match path.file_name() {
+        Some(x) => x.to_str().unwrap(),
+        None => ""
+    };
 
     let node_type = if metadata.is_dir() {
         NodeType::Directory

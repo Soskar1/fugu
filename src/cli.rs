@@ -17,7 +17,7 @@ fn run_internal(args: Args) {
     if args.path.is_file() {
         panic!("File paths are not allowed");
     }
-    
+
     let root_node = analyze(args.path);
     println!("./{} {}B", root_node.node_name(), root_node.size());
     
