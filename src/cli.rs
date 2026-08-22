@@ -18,8 +18,12 @@ fn run_internal(args: Args) {
         panic!("File paths are not allowed");
     }
     
-    let size = analyze(args.path);
-    //println!("{}", size);
+    let root_node = analyze(args.path);
+    println!("./{} {}B", root_node.node_name(), root_node.size());
+    
+    for node in root_node.iter() {
+        println!("\t{} {}B", node.node_name(), node.size())
+    }
 }
 
 #[cfg(test)]

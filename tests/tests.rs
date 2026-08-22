@@ -7,17 +7,19 @@ const FUGU: &str = "fugu";
 #[test]
 fn fugu_prints_file_name_and_size_in_bytes() {
     // Arrange
-    let directory = tempdir().unwrap();
-    let file = directory.path().join("hello.txt");
-
-    fs::write(&file, "Hello, World!").unwrap();
+    let temp= tempdir().unwrap();
+    let root_path = temp.path().join("root");
+    let _ = fs::create_dir(&root_path);
+    
+    let file = root_path.join("hello.txt");
+    let _ = fs::write(&file, "Hello, World!");
 
     let mut command = Command::cargo_bin(FUGU).unwrap();
 
     // Act & Assert
     command
-        .arg(directory.path())
+        .arg(root_path)
         .assert()
         .success()
-        .stdout("./ 13B\n\thello.txt 13B\n");
+        .stdout("./root 13B\n\thello.txt 13B\n");
 }
