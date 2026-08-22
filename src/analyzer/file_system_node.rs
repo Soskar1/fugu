@@ -1,12 +1,10 @@
-use std::fs;
-use std::path::PathBuf;
-
 #[derive(PartialEq, Debug, Copy, Clone)]
 pub enum NodeType {
     File,
     Directory
 }
 
+#[derive(Debug, PartialEq)]
 pub struct FileSystemNode {
     node_name: String,
     size: u64,
@@ -15,51 +13,102 @@ pub struct FileSystemNode {
 }
 
 impl FileSystemNode {
-    pub fn new(name: &str, size: u64, node_type: NodeType) -> FileSystemNode {
+    fn new_internal(name: &str, size: u64, node_type: NodeType, nodes: Vec<FileSystemNode>) -> FileSystemNode {
         FileSystemNode {
             node_name: name.to_string(),
             size,
             node_type,
-            nodes: Vec::new()
+            nodes
         }
     }
+
+    pub fn new_file(name: &str, size: u64) -> FileSystemNode {
+        FileSystemNode::new_internal(name, size, NodeType::File, vec![])
+    }
+
+    pub fn new_directory(name: &str, size: u64, nodes: Vec<FileSystemNode>) -> FileSystemNode {
+        FileSystemNode::new_internal(name, size, NodeType::Directory, nodes)
+    }
+
     pub fn node_name(&self) -> &str { &self.node_name }
     pub fn size(&self) -> u64 { self.size }
     pub fn node_type(&self) -> NodeType { self.node_type }
+    
     pub fn add(&mut self, node: FileSystemNode) {
+        if self.node_type == NodeType::File {
+            panic!("Can't add a node to a file node");
+        }
 
+        self.nodes.push(node);
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &FileSystemNode> {
+        self.nodes.iter()
     }
 }
 
 #[cfg(test)]
 mod test {
-    use rstest::rstest;
     use super::*;
 
     #[test]
     fn add_adds_node() {
         // Arrange
-        let mut node = FileSystemNode::new("directory", 1, NodeType::Directory);
+        let mut node = FileSystemNode::new_directory("directory", 1, vec![]);
 
         // Act
-        node.add(FileSystemNode::new("directory", 1, NodeType::File));
+        node.add(FileSystemNode::new_file("file", 1));
 
         // Assert
         assert_eq!(node.nodes.len(), 1);
-        assert_eq!(node.nodes[0].node_name(), "directory");
+        assert_eq!(node.nodes[0].node_name(), "file");
         assert_eq!(node.nodes[0].node_type(), NodeType::File);
         assert_eq!(node.nodes[0].size(), 1);
     }
 
-    #[rstest]
+    #[test]
     #[should_panic]
-    #[case(NodeType::Directory)]
-    #[case(NodeType::File)]
-    fn add_does_not_add_file_to_file(#[case] node_type: NodeType) {
+    fn add_panics_when_parent_is_file() {
         // Arrange
-        let mut node = FileSystemNode::new("file", 1, NodeType::File);
+        let mut node = FileSystemNode::new_file("file", 1);
 
         // Act & Assert
-        node.add(FileSystemNode::new("file", 1, node_type));
+        node.add(FileSystemNode::new_file("file", 1));
+    }
+
+    #[test]
+    fn new_directory_creates_directory() {
+        // Arrange & Act
+        let node = FileSystemNode::new_directory("directory", 0, vec![]);
+
+        // Assert
+        assert_eq!(node.node_type, NodeType::Directory);
+    }
+
+    #[test]
+    fn new_file_creates_file() {
+        // Arrange & Act
+        let node = FileSystemNode::new_file("file", 1);
+
+        // Assert
+        assert_eq!(node.node_type, NodeType::File);
+    }
+
+    #[test]
+    fn iter_returns_nodes_iterator() {
+        // Arrange
+        let node = FileSystemNode::new_directory("test", 0, vec![
+            FileSystemNode::new_file("name1", 1),
+            FileSystemNode::new_file("name2", 1),
+            FileSystemNode::new_directory("name3", 1, vec![]),
+        ]);
+
+        // Act
+        let mut iterator = node.iter();
+
+        // Assert
+        assert_eq!(Some(&FileSystemNode::new_file("name1", 1)), iterator.next());
+        assert_eq!(Some(&FileSystemNode::new_file("name2", 1)), iterator.next());
+        assert_eq!(Some(&FileSystemNode::new_directory("name3", 1, vec![])), iterator.next());
     }
 }
