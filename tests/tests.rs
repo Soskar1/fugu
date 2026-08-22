@@ -50,15 +50,12 @@ fn fugu_accepts_working_directory() {
 }
 
 #[test]
-fn fugu_sorts_by_size_descending_order() {
+fn fugu_prints_kilobytes() {
     // Arrange
     let (_temp, root_path) = create_root_folder();
 
-    let file = root_path.join("goodbye.txt");
-    let _ = fs::write(&file, "Goodbye, World!");
-
-    let file = root_path.join("hello.txt");
-    let _ = fs::write(&file, "Hello, World!");
+    let file = root_path.join("kb_test.txt");
+    fs::write(&file, vec![0u8; 1000]).unwrap();
 
     let mut command = Command::cargo_bin(FUGU).unwrap();
 
@@ -68,5 +65,5 @@ fn fugu_sorts_by_size_descending_order() {
         .arg("./")
         .assert()
         .success()
-        .stdout("./ 28B\n\tgoodbye.txt 15B\n\thello.txt 13B\n");
+        .stdout("./ 1KB\n\tkb_test.txt 1KB\n");
 }
