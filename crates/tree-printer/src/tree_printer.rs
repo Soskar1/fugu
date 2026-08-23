@@ -32,14 +32,12 @@ pub fn get_tree_string_with_options(root_node: &impl PrintableTreeNode, options:
         format!("{} ", "─".repeat(options.indentation_size - 2))
     };
 
-    let tree = get_tree_string_internal(root_node, options, &indentation, "");
-    output.push_str(&tree);
+    populate_tree_string(root_node, options, &indentation, "", &mut output);
 
     output
 }
 
-fn get_tree_string_internal(root_node: &impl PrintableTreeNode, options: TreeFormatOptions, indentation: &str, prefix: &str) -> String {
-    let mut output = "".to_string();
+fn populate_tree_string(root_node: &impl PrintableTreeNode, options: TreeFormatOptions, indentation: &str, prefix: &str, output: &mut String) {
     let mut nodes = root_node.get_tree_nodes().iter().peekable();
 
     while let Some(node) = nodes.next() {
@@ -62,12 +60,9 @@ fn get_tree_string_internal(root_node: &impl PrintableTreeNode, options: TreeFor
                 format!("{}│{}", prefix, " ".repeat(options.indentation_size - 1))
             };
 
-            let sub_tree = get_tree_string_internal(node, options, indentation, &prefix);
-            output.push_str(&sub_tree);
+            populate_tree_string(node, options, indentation, &prefix, output);
         }
     }
-
-    output
 }
 
 #[cfg(test)]
