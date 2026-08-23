@@ -24,7 +24,7 @@ pub fn get_tree_string(root_node: &impl PrintableTreeNode) -> String {
 }
 
 pub fn get_tree_string_with_options(root_node: &impl PrintableTreeNode, options: TreeFormatOptions) -> String {
-    let mut output = root_node.get_data().to_string();
+    let mut output = root_node.data().to_string();
 
     let indentation = if options.indentation_size == 1 {
         String::new()
@@ -38,20 +38,20 @@ pub fn get_tree_string_with_options(root_node: &impl PrintableTreeNode, options:
 }
 
 fn populate_tree_string(root_node: &impl PrintableTreeNode, options: TreeFormatOptions, indentation: &str, prefix: &str, output: &mut String) {
-    let mut nodes = root_node.get_tree_nodes().iter().peekable();
+    let mut nodes = root_node.tree_nodes().iter().peekable();
 
     while let Some(node) = nodes.next() {
         let is_last  = nodes.peek().is_none();
 
         let line = if is_last {
-            format!("\n{}└{}{}", prefix, indentation, node.get_data())
+            format!("\n{}└{}{}", prefix, indentation, node.data())
         } else {
-            format!("\n{}├{}{}", prefix, indentation, node.get_data())
+            format!("\n{}├{}{}", prefix, indentation, node.data())
         };
 
         output.push_str(&line);
         
-        let is_sub_tree_exists = !node.get_tree_nodes().is_empty();
+        let is_sub_tree_exists = !node.tree_nodes().is_empty();
 
         if is_sub_tree_exists {
             let prefix = if is_last {
@@ -86,11 +86,11 @@ mod tests {
     }
 
     impl PrintableTreeNode for TestTreeNode {
-        fn get_data(&self) -> &str {
+        fn data(&self) -> &str {
             &self.data
         }
 
-        fn get_tree_nodes(&self) -> &[Self]{
+        fn tree_nodes(&self) -> &[Self]{
             &self.children
         }
     }
