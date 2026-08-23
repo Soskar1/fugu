@@ -181,7 +181,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn tree_format_options_new_panics_when_zero_indenation_size() {
-        // Arragne & Act & Assert
+        // Arrange & Act & Assert
         TreeFormatOptions::new(0);
     }
 
