@@ -1,7 +1,7 @@
 use crate::printable_tree_node::PrintableTreeNode;
 
 pub struct TreeFormatOptions {
-    indentation: String
+    indentation_size: usize
 }
 
 impl TreeFormatOptions {
@@ -9,15 +9,9 @@ impl TreeFormatOptions {
         if indentation_size == 0 {
             panic!("indentation cannot be zero!");
         }
-
-        let indentation = match indentation_size {
-            x if x > 2 => format!("{} ", "─".repeat(x - 2)),
-            x if x == 2 => " ".to_string(),
-            _ => "".to_string()
-        };
         
         TreeFormatOptions { 
-            indentation
+            indentation_size
         }
     }
 }
@@ -30,6 +24,21 @@ pub fn get_tree_string(root_node: &impl PrintableTreeNode) -> String {
 
 pub fn get_tree_string_with_options(root_node: &impl PrintableTreeNode, options: TreeFormatOptions) -> String {
     let mut output = root_node.get_data().to_string();
+
+    let indentation = match options.indentation_size {
+        x if x > 2 => format!("{} ", "─".repeat(x - 2)),
+        x if x == 2 => " ".to_string(),
+        _ => "".to_string()
+    };
+
+    let tree = get_tree_string_internal(root_node, &options, &indentation, "");
+    output.push_str(&tree);
+
+    output
+}
+
+fn get_tree_string_internal(root_node: &impl PrintableTreeNode, options: &TreeFormatOptions, indentation: &str, prefix: &str) -> String {
+    let mut output = "".to_string();
     let nodes = root_node.get_tree_nodes();
 
     for (index, node) in nodes.iter().enumerate() {
@@ -37,12 +46,23 @@ pub fn get_tree_string_with_options(root_node: &impl PrintableTreeNode, options:
         let is_last = index + 1 == nodes.len();
 
         let line = if is_last {
-            format!("\n└{}{}", options.indentation, node.get_data())
+            format!("\n{}└{}{}", prefix, indentation, node.get_data())
         } else {
-            format!("\n├{}{}", options.indentation, node.get_data())
+            format!("\n{}├{}{}", prefix, indentation, node.get_data())
         };
 
         output.push_str(&line);
+
+        if node.get_tree_nodes().len() > 0 {
+            let prefix = if is_last {
+                format!("{}{}", prefix, " ".repeat(options.indentation_size))
+            } else {
+                format!("{}│{}", prefix, " ".repeat(options.indentation_size - 1))
+            };
+
+            let sub_tree = get_tree_string_internal(node, &options, indentation, &prefix);
+            output.push_str(&sub_tree);
+        }
     }
 
     output
@@ -186,5 +206,57 @@ mod tests {
 ├── depth1
 │   └── depth2
 └── depth1");
+    }
+
+    #[test]
+    fn get_tree_string_vertical_lines_on_demand() {
+        // Arrange
+        let root = TestTreeNode::new("root", vec![
+            TestTreeNode::new("depth1", vec![
+                TestTreeNode::new("depth2", vec![
+                    TestTreeNode::new("depth3", vec![
+                        TestTreeNode::new("depth4", vec![])
+                    ])
+                ]),
+                TestTreeNode::new("depth2", vec![])
+            ]),
+            TestTreeNode::new("depth1", vec![])
+        ]);
+
+        // Act
+        let result = get_tree_string(&root);
+
+        // Assert
+        assert_eq!(result, "root
+├── depth1
+│   ├── depth2
+│   │   └── depth3
+│   │       └── depth4
+│   └── depth2
+└── depth1");
+    }
+
+    #[test]
+    fn get_tree_string_is_recursive() {
+        // Arrange
+        let root = TestTreeNode::new("root", vec![
+            TestTreeNode::new("depth1", vec![
+                TestTreeNode::new("depth2", vec![
+                    TestTreeNode::new("depth3", vec![
+                        TestTreeNode::new("depth4", vec![])
+                    ])
+                ])
+            ])
+        ]);
+
+        // Act
+        let result = get_tree_string(&root);
+
+        // Assert
+        assert_eq!(result, "root
+└── depth1
+    └── depth2
+        └── depth3
+            └── depth4");
     }
 }
