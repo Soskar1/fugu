@@ -52,8 +52,10 @@ fn get_tree_string_internal(root_node: &impl PrintableTreeNode, options: TreeFor
         };
 
         output.push_str(&line);
+        
+        let is_sub_tree_exists = !node.get_tree_nodes().is_empty();
 
-        if !node.get_tree_nodes().is_empty() {
+        if is_sub_tree_exists {
             let prefix = if is_last {
                 format!("{}{}", prefix, " ".repeat(options.indentation_size))
             } else {
