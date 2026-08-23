@@ -1,11 +1,10 @@
-[package]
-name = "fugu"
-version = "0.1.0"
-edition = "2024"
+[workspace]
+resolver = "3"
+members = [
+    "crates/fugu-core",
+    "fugu-cli"
+]
 
-[dependencies]
-assert_cmd = "2"
-clap = { version = "4.6.5", features = ["derive"] }
+[workspace.dependencies]
 rstest = "0.26.1"
 tempfile = "3"
-thiserror = "2"

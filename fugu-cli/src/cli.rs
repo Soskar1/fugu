@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use clap::Parser;
-use fugu::analyzer::file_system_analyzer::analyze;
-use fugu::analyzer::file_system_node::{FileSystemNode, NodeType};
+use fugu_core::analyzer::file_system_analyzer::analyze;
+use fugu_core::analyzer::file_system_node::{FileSystemNode, NodeType};
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
