@@ -26,10 +26,10 @@ pub fn get_tree_string(root_node: &impl PrintableTreeNode) -> String {
 pub fn get_tree_string_with_options(root_node: &impl PrintableTreeNode, options: TreeFormatOptions) -> String {
     let mut output = root_node.get_data().to_string();
 
-    let indentation = match options.indentation_size {
-        x if x > 2 => format!("{} ", "─".repeat(x - 2)),
-        x if x == 2 => " ".to_string(),
-        _ => "".to_string()
+    let indentation = if options.indentation_size == 1 {
+        String::new()
+    } else {
+        format!("{} ", "─".repeat(options.indentation_size - 2))
     };
 
     let tree = get_tree_string_internal(root_node, options, &indentation, "");
