@@ -1,5 +1,6 @@
 use crate::printable_tree_node::PrintableTreeNode;
 
+#[derive(Debug, Clone, Copy)]
 pub struct TreeFormatOptions {
     indentation_size: usize
 }
@@ -31,13 +32,13 @@ pub fn get_tree_string_with_options(root_node: &impl PrintableTreeNode, options:
         _ => "".to_string()
     };
 
-    let tree = get_tree_string_internal(root_node, &options, &indentation, "");
+    let tree = get_tree_string_internal(root_node, options, &indentation, "");
     output.push_str(&tree);
 
     output
 }
 
-fn get_tree_string_internal(root_node: &impl PrintableTreeNode, options: &TreeFormatOptions, indentation: &str, prefix: &str) -> String {
+fn get_tree_string_internal(root_node: &impl PrintableTreeNode, options: TreeFormatOptions, indentation: &str, prefix: &str) -> String {
     let mut output = "".to_string();
     let nodes = root_node.get_tree_nodes();
 
@@ -60,7 +61,7 @@ fn get_tree_string_internal(root_node: &impl PrintableTreeNode, options: &TreeFo
                 format!("{}│{}", prefix, " ".repeat(options.indentation_size - 1))
             };
 
-            let sub_tree = get_tree_string_internal(node, &options, indentation, &prefix);
+            let sub_tree = get_tree_string_internal(node, options, indentation, &prefix);
             output.push_str(&sub_tree);
         }
     }
