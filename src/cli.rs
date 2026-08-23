@@ -31,7 +31,8 @@ fn run_internal(args: Args) {
 
 fn node_to_string(node: &FileSystemNode) -> String {
     let size = node.size() as f64;
-    
+    let node_name = node.node_name();
+
     let (size, byte_str) = match size {
         x if x >= 1_000_000_000.0 => (x / 1_000_000_000.0, "GB"),
         x if x >= 1_000_000.0 => (x / 1_000_000.0, "MB"),
@@ -39,8 +40,12 @@ fn node_to_string(node: &FileSystemNode) -> String {
         x => (x, "B")
     };
     
-    let node_name = node.node_name();
-    format!("{node_name} {size}{byte_str}")
+    if size.fract() == 0.0 {
+        format!("{node_name} {size}{byte_str}")
+    } else {
+        let size = (size * 100.0).trunc() / 100.0;
+        format!("{node_name} {size:.2}{byte_str}")
+    }
 }
 
 #[cfg(test)]
