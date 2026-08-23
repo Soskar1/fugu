@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use clap::Parser;
 use fugu::analyzer::file_system_analyzer::analyze;
-use fugu::analyzer::file_system_node::FileSystemNode;
+use fugu::analyzer::file_system_node::{FileSystemNode, NodeType};
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -22,10 +22,22 @@ fn run_internal(args: Args) {
     let root_node = analyze(args.path);
     let output = node_to_string(&root_node);
     println!("./{output}");
+
+    display_directory_files(&root_node, 1);
+}
+
+fn display_directory_files(node: &FileSystemNode, depth: usize) {
+    let indentation = "\t".repeat(depth);
     
-    for node in root_node.iter() {
-        let output = node_to_string(&node);
-        println!("\t{output}")
+    for directory_node in node.iter() {
+        let output = node_to_string(&directory_node);
+
+        if directory_node.node_type() == NodeType::Directory {
+            println!("{indentation}/{output}");
+            display_directory_files(directory_node, depth + 1);
+        } else {
+            println!("{indentation}{output}");
+        }
     }
 }
 

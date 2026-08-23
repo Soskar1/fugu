@@ -67,3 +67,22 @@ fn fugu_prints_kilobytes() {
         .success()
         .stdout("./ 1KB\n\tkb_test.txt 1KB\n");
 }
+
+#[test]
+fn fugu_prints_info_recursively() {
+   // Arrange
+    let (_temp, root_path) = create_root_folder();
+
+    fs::create_dir(&root_path.join("test")).unwrap();
+    fs::write(&root_path.join("test/test.txt"), "aaa").unwrap();
+
+    let mut command = Command::cargo_bin(FUGU).unwrap();
+
+    // Act & Assert
+    command
+        .current_dir(root_path)
+        .arg("./")
+        .assert()
+        .success()
+        .stdout("./ 3B\n\t/test 3B\n\t\ttest.txt 3B\n");
+}
