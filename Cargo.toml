@@ -1,7 +1,7 @@
 [workspace]
 resolver = "3"
 members = [
-    "crates/fugu-core",
+    "crates/fugu-core", "crates/tree-printer",
     "fugu-cli"
 ]
 

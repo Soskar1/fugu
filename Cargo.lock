@@ -571,6 +571,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "tree-printer"
+version = "0.1.0"
+dependencies = [
+ "rstest",
+]
+
+[[package]]
 name = "unicode-ident"
 version = "1.0.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -1,0 +1,190 @@
+use crate::printable_tree_node::PrintableTreeNode;
+
+pub struct TreeFormatOptions {
+    indentation: String
+}
+
+impl TreeFormatOptions {
+    pub fn new(indentation_size: usize) -> TreeFormatOptions {
+        if indentation_size == 0 {
+            panic!("indentation cannot be zero!");
+        }
+
+        let indentation = match indentation_size {
+            x if x > 2 => format!("{} ", "─".repeat(x - 2)),
+            x if x == 2 => " ".to_string(),
+            _ => "".to_string()
+        };
+        
+        TreeFormatOptions { 
+            indentation
+        }
+    }
+}
+
+pub fn get_tree_string(root_node: &impl PrintableTreeNode) -> String {
+    let options = TreeFormatOptions::new(4);
+    
+    get_tree_string_with_options(root_node, options)
+}
+
+pub fn get_tree_string_with_options(root_node: &impl PrintableTreeNode, options: TreeFormatOptions) -> String {
+    let mut output = root_node.get_data().to_string();
+    let nodes = root_node.get_tree_nodes();
+
+    for (index, node) in nodes.iter().enumerate() {
+        // TODO: overflow is possible here!
+        let is_last = index + 1 == nodes.len();
+
+        let line = if is_last {
+            format!("\n└{}{}", options.indentation, node.get_data())
+        } else {
+            format!("\n├{}{}", options.indentation, node.get_data())
+        };
+
+        output.push_str(&line);
+    }
+
+    output
+}
+
+#[cfg(test)]
+mod tests {
+    use std::vec;
+    use rstest::rstest;
+    use super::*;
+
+    struct TestTreeNode {
+        data: String,
+        children: Vec<TestTreeNode>
+    }
+
+    impl TestTreeNode {
+        fn new(data: &str, children: Vec<TestTreeNode>) -> TestTreeNode {
+            TestTreeNode {
+                data: data.to_string(),
+                children
+            }
+        }
+    }
+
+    impl PrintableTreeNode for TestTreeNode {
+        fn get_data(&self) -> &str {
+            &self.data
+        }
+
+        fn get_tree_nodes(&self) -> &[Self]{
+            &self.children
+        }
+    }
+
+    #[test]
+    fn get_tree_string_returns_root() {
+        // Arrange
+        let root = TestTreeNode::new("root", vec![]);
+
+        // Act
+        let result = get_tree_string(&root);
+
+        // Assert
+        assert_eq!(result, "root");
+    }
+
+    #[test]
+    fn get_tree_string_with_options_inserts_leaf_connector_character() {
+        // Arrange
+        let root = TestTreeNode::new("root", vec![
+            TestTreeNode::new("depth1", vec![])
+        ]);
+
+        let options = TreeFormatOptions::new(2);
+
+        // Act
+        let result = get_tree_string_with_options(&root, options);
+
+        // Assert
+        assert_eq!(result, "root\n└ depth1");
+    }
+
+    #[test]
+    fn get_tree_string_with_options_inserts_branch_connector_character() {
+        // Arrange
+        let root = TestTreeNode::new("root", vec![
+            TestTreeNode::new("depth1", vec![]),
+            TestTreeNode::new("depth1", vec![])
+        ]);
+
+        let options = TreeFormatOptions::new(2);
+
+        // Act
+        let result = get_tree_string_with_options(&root, options);
+
+        // Assert
+        assert_eq!(result, "root\n├ depth1\n└ depth1");
+    }
+
+    #[test]
+    fn get_tree_string_inserts_horizontal_connector_character() {
+        // Arrange
+        let root = TestTreeNode::new("root", vec![
+            TestTreeNode::new("depth1", vec![]),
+            TestTreeNode::new("depth1", vec![])
+        ]);
+
+        // Act
+        let result = get_tree_string(&root);
+
+        // Assert
+        assert_eq!(result, "root
+├── depth1
+└── depth1");
+    }
+
+    #[rstest]
+    #[case(1, "root\n└depth1")]
+    #[case(2, "root\n└ depth1")]
+    #[case(3, "root\n└─ depth1")]
+    #[case(4, "root\n└── depth1")]
+    #[case(5, "root\n└─── depth1")]
+    fn get_tree_string_with_options_indentation(#[case] indentation_size: usize, #[case] expected: &str) {
+        // Arrange
+        let root = TestTreeNode::new("root", vec![
+            TestTreeNode::new("depth1", vec![])
+        ]);
+
+        let options = TreeFormatOptions::new(indentation_size);
+
+        // Act
+        let result = get_tree_string_with_options(&root, options);
+
+        // Assert
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    #[should_panic]
+    fn tree_format_options_new_panics_when_zero_indenation_size() {
+        // Arragne & Act & Assert
+        TreeFormatOptions::new(0);
+    }
+
+    #[test]
+    fn get_tree_string_inserts_vertical_connector_character() {
+        // Arrange
+        let root = TestTreeNode::new("root", vec![
+            TestTreeNode::new("depth1", vec![
+                TestTreeNode::new("depth2", vec![])
+            ]),
+            TestTreeNode::new("depth1", vec![])
+        ]);
+
+        // Act
+        let result = get_tree_string(&root);
+
+        // Assert
+        assert_eq!(result, "root
+├── depth1
+│   └── depth2
+└── depth1");
+    }
+}
