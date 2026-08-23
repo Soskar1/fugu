@@ -40,11 +40,10 @@ pub fn get_tree_string_with_options(root_node: &impl PrintableTreeNode, options:
 
 fn get_tree_string_internal(root_node: &impl PrintableTreeNode, options: TreeFormatOptions, indentation: &str, prefix: &str) -> String {
     let mut output = "".to_string();
-    let nodes = root_node.get_tree_nodes();
+    let mut nodes = root_node.get_tree_nodes().iter().peekable();
 
-    for (index, node) in nodes.iter().enumerate() {
-        // TODO: overflow is possible here!
-        let is_last = index + 1 == nodes.len();
+    while let Some(node) = nodes.next() {
+        let is_last  = nodes.peek().is_none();
 
         let line = if is_last {
             format!("\n{}└{}{}", prefix, indentation, node.get_data())
