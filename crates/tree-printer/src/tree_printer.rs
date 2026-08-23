@@ -53,7 +53,7 @@ fn get_tree_string_internal(root_node: &impl PrintableTreeNode, options: TreeFor
 
         output.push_str(&line);
 
-        if node.get_tree_nodes().is_empty() {
+        if !node.get_tree_nodes().is_empty() {
             let prefix = if is_last {
                 format!("{}{}", prefix, " ".repeat(options.indentation_size))
             } else {
