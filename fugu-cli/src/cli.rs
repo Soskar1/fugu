@@ -1,7 +1,9 @@
 use std::path::PathBuf;
 use clap::Parser;
 use fugu_core::analyzer::file_system_analyzer::analyze;
-use fugu_core::analyzer::file_system_node::{FileSystemNode, NodeType};
+use fugu_core::analyzer::file_system_node::{FileSystemNode};
+use tree_printer::printable_tree_node::PrintableTreeNode;
+use tree_printer::tree_printer::get_tree_string;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -20,24 +22,29 @@ fn run_internal(args: Args) {
     }
 
     let root_node = analyze(args.path);
-    let output = node_to_string(&root_node);
-    println!("./{output}");
+    let displayable_tree = create_displayable_tree(&root_node);
 
-    display_directory_files(&root_node, 1);
+    let output = get_tree_string(&displayable_tree);
+
+    println!("./{}", output);
 }
 
-fn display_directory_files(node: &FileSystemNode, depth: usize) {
-    let indentation = "\t".repeat(depth);
-    
-    for directory_node in node.iter() {
-        let output = node_to_string(&directory_node);
+fn create_displayable_tree(root_node: &FileSystemNode) -> DisplayableFileSystemNode {
+    let data = node_to_string(root_node);
+    let mut display_node = DisplayableFileSystemNode::new(&data);
 
-        if directory_node.node_type() == NodeType::Directory {
-            println!("{indentation}/{output}");
-            display_directory_files(directory_node, depth + 1);
-        } else {
-            println!("{indentation}{output}");
-        }
+    create_displayable_tree_recursive(root_node, &mut display_node);
+
+    display_node
+}
+
+fn create_displayable_tree_recursive(root_node: &FileSystemNode, current_display_node: &mut DisplayableFileSystemNode) {
+    for node in root_node.iter() {
+        let data = node_to_string(node);
+        let mut display_node = DisplayableFileSystemNode::new(&data);
+        create_displayable_tree_recursive(node, &mut display_node);
+
+        current_display_node.children.push(display_node);
     }
 }
 
@@ -51,12 +58,39 @@ fn node_to_string(node: &FileSystemNode) -> String {
         x if x >= 1000.0 => (x / 1000.0, "KB"),
         x => (x, "B")
     };
-    
+
     if size.fract() == 0.0 {
         format!("{node_name} {size}{byte_str}")
     } else {
         let size = (size * 100.0).trunc() / 100.0;
         format!("{node_name} {size:.2}{byte_str}")
+    }
+}
+
+struct DisplayableFileSystemNode {
+    data: String,
+    children: Vec<DisplayableFileSystemNode>
+}
+
+impl DisplayableFileSystemNode {
+    fn new(data: &str) -> DisplayableFileSystemNode {
+        DisplayableFileSystemNode {
+            data: data.to_string(),
+            children: vec![]
+        }
+    }
+}
+
+impl PrintableTreeNode for DisplayableFileSystemNode {
+    fn data(&self) -> &str {
+        &self.data
+    }
+
+    fn tree_nodes(&self) -> &[Self]
+    where
+        Self: Sized
+    {
+        &self.children
     }
 }
 

@@ -1,2 +1,2 @@
-mod tree_printer;
-mod printable_tree_node;
+pub mod tree_printer;
+pub mod printable_tree_node;

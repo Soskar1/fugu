@@ -27,7 +27,7 @@ fn fugu_prints_file_name_and_size_in_bytes() {
         .arg(root_path)
         .assert()
         .success()
-        .stdout("./root 13B\n\thello.txt 13B\n");
+        .stdout("./root 13B\n└── hello.txt 13B\n");
 }
 
 #[test]
@@ -46,7 +46,7 @@ fn fugu_accepts_working_directory() {
         .arg("./")
         .assert()
         .success()
-        .stdout("./ 13B\n\thello.txt 13B\n");
+        .stdout("./ 13B\n└── hello.txt 13B\n");
 }
 
 #[test]
@@ -65,7 +65,7 @@ fn fugu_prints_kilobytes() {
         .arg("./")
         .assert()
         .success()
-        .stdout("./ 1KB\n\tkb_test.txt 1KB\n");
+        .stdout("./ 1KB\n└── kb_test.txt 1KB\n");
 }
 
 #[test]
@@ -84,5 +84,5 @@ fn fugu_prints_info_recursively() {
         .arg("./")
         .assert()
         .success()
-        .stdout("./ 3B\n\t/test 3B\n\t\ttest.txt 3B\n");
+        .stdout("./ 3B\n└── test 3B\n    └── test.txt 3B\n");
 }

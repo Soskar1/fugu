@@ -182,6 +182,7 @@ dependencies = [
  "fugu-core",
  "rstest",
  "tempfile",
+ "tree-printer",
 ]
 
 [[package]]
