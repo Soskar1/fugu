@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use clap::Parser;
 use fugu_core::analyzer::file_system_analyzer::analyze;
-use fugu_core::analyzer::file_system_node::{FileSystemNode};
+use fugu_core::analyzer::file_system_node::{FileSystemNode, NodeType};
 use tree_printer::printable_tree_node::PrintableTreeNode;
 use tree_printer::tree_printer::get_tree_string;
 
@@ -26,7 +26,7 @@ fn run_internal(args: Args) {
 
     let output = get_tree_string(&displayable_tree);
 
-    println!("./{}", output);
+    println!("{}", output);
 }
 
 fn create_displayable_tree(root_node: &FileSystemNode) -> DisplayableFileSystemNode {
@@ -51,6 +51,11 @@ fn create_displayable_tree_recursive(root_node: &FileSystemNode, current_display
 fn node_to_string(node: &FileSystemNode) -> String {
     let size = node.size() as f64;
     let node_name = node.node_name();
+    let directory_prefix = if node.node_type() == NodeType::Directory {
+        "./"
+    } else {
+        ""
+    };
 
     let (size, byte_str) = match size {
         x if x >= 1_000_000_000.0 => (x / 1_000_000_000.0, "GB"),
@@ -60,10 +65,10 @@ fn node_to_string(node: &FileSystemNode) -> String {
     };
 
     if size.fract() == 0.0 {
-        format!("{node_name} {size}{byte_str}")
+        format!("{directory_prefix}{node_name} {size}{byte_str}")
     } else {
         let size = (size * 100.0).trunc() / 100.0;
-        format!("{node_name} {size:.2}{byte_str}")
+        format!("{directory_prefix}{node_name} {size:.2}{byte_str}")
     }
 }
 

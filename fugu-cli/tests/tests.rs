@@ -84,5 +84,5 @@ fn fugu_prints_info_recursively() {
         .arg("./")
         .assert()
         .success()
-        .stdout("./ 3B\n└── test 3B\n    └── test.txt 3B\n");
+        .stdout("./ 3B\n└── ./test 3B\n    └── test.txt 3B\n");
 }
