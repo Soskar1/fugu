@@ -33,14 +33,6 @@ impl FileSystemNode {
     pub fn node_name(&self) -> &str { &self.node_name }
     pub fn size(&self) -> u64 { self.size }
     pub fn node_type(&self) -> NodeType { self.node_type }
-    
-    pub fn add(&mut self, node: FileSystemNode) {
-        if self.node_type == NodeType::File {
-            panic!("Can't add a node to a file node");
-        }
-
-        self.nodes.push(node);
-    }
 
     pub fn iter(&self) -> impl Iterator<Item = &FileSystemNode> {
         self.nodes.iter()
@@ -50,31 +42,6 @@ impl FileSystemNode {
 #[cfg(test)]
 mod test {
     use super::*;
-
-    #[test]
-    fn add_adds_node() {
-        // Arrange
-        let mut node = FileSystemNode::new_directory("directory", 1, vec![]);
-
-        // Act
-        node.add(FileSystemNode::new_file("file", 1));
-
-        // Assert
-        assert_eq!(node.nodes.len(), 1);
-        assert_eq!(node.nodes[0].node_name(), "file");
-        assert_eq!(node.nodes[0].node_type(), NodeType::File);
-        assert_eq!(node.nodes[0].size(), 1);
-    }
-
-    #[test]
-    #[should_panic]
-    fn add_panics_when_parent_is_file() {
-        // Arrange
-        let mut node = FileSystemNode::new_file("file", 1);
-
-        // Act & Assert
-        node.add(FileSystemNode::new_file("file", 1));
-    }
 
     #[test]
     fn new_directory_creates_directory() {

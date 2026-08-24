@@ -17,10 +17,16 @@ impl TreeFormatOptions {
     }
 }
 
+impl Default for TreeFormatOptions {
+    fn default() -> TreeFormatOptions {
+        Self {
+            indentation_size: 4
+        }
+    }
+}
+
 pub fn get_tree_string(root_node: &impl PrintableTreeNode) -> String {
-    let options = TreeFormatOptions::new(4);
-    
-    get_tree_string_with_options(root_node, options)
+    get_tree_string_with_options(root_node, TreeFormatOptions::default())
 }
 
 pub fn get_tree_string_with_options(root_node: &impl PrintableTreeNode, options: TreeFormatOptions) -> String {

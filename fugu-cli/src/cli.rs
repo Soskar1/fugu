@@ -21,7 +21,7 @@ fn run_internal(args: Args) {
         panic!("File paths are not allowed");
     }
 
-    let root_node = analyze(args.path);
+    let root_node = analyze(&args.path);
     let displayable_tree = create_displayable_tree(&root_node);
 
     let output = get_tree_string(&displayable_tree);
@@ -29,22 +29,10 @@ fn run_internal(args: Args) {
     println!("{}", output);
 }
 
-fn create_displayable_tree(root_node: &FileSystemNode) -> DisplayableFileSystemNode {
-    let data = node_to_string(root_node);
-    let mut display_node = DisplayableFileSystemNode::new(&data);
-
-    create_displayable_tree_recursive(root_node, &mut display_node);
-
-    display_node
-}
-
-fn create_displayable_tree_recursive(root_node: &FileSystemNode, current_display_node: &mut DisplayableFileSystemNode) {
-    for node in root_node.iter() {
-        let data = node_to_string(node);
-        let mut display_node = DisplayableFileSystemNode::new(&data);
-        create_displayable_tree_recursive(node, &mut display_node);
-
-        current_display_node.children.push(display_node);
+fn create_displayable_tree(node: &FileSystemNode) -> DisplayableFileSystemNode {
+    DisplayableFileSystemNode {
+        data: node_to_string(node),
+        children: node.iter().map(create_displayable_tree).collect()
     }
 }
 
@@ -75,15 +63,6 @@ fn node_to_string(node: &FileSystemNode) -> String {
 struct DisplayableFileSystemNode {
     data: String,
     children: Vec<DisplayableFileSystemNode>
-}
-
-impl DisplayableFileSystemNode {
-    fn new(data: &str) -> DisplayableFileSystemNode {
-        DisplayableFileSystemNode {
-            data: data.to_string(),
-            children: vec![]
-        }
-    }
 }
 
 impl PrintableTreeNode for DisplayableFileSystemNode {

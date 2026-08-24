@@ -1,32 +1,21 @@
 use std::{cmp::Reverse, fs};
-use std::path::PathBuf;
-use crate::analyzer::file_system_node::{FileSystemNode, NodeType};
+use std::path::{Path};
+use crate::analyzer::file_system_node::{FileSystemNode};
 
-pub fn analyze(path: PathBuf) -> FileSystemNode {
+pub fn analyze(path: &Path) -> FileSystemNode {
     let metadata = fs::metadata(&path).unwrap();
 
     let file_name = match path.file_name() {
         Some(x) => x.to_str().unwrap(),
         None => ""
     };
-
-    let node_type = if metadata.is_dir() {
-        NodeType::Directory
-    } else {
-        NodeType::File
-    };
-
-    let mut size = if node_type == NodeType::Directory {
-        0
-    } else {
-        metadata.len()
-    };
     
-    if node_type == NodeType::Directory {
+    if metadata.is_dir() {
         let mut nodes: Vec<FileSystemNode> = vec![];
+        let mut size = 0;
 
         for entry in fs::read_dir(&path).unwrap() {
-            let subfile_node = analyze(entry.unwrap().path().to_path_buf());
+            let subfile_node = analyze(&entry.unwrap().path());
             size += subfile_node.size();
 
             nodes.push(subfile_node);
@@ -36,7 +25,7 @@ pub fn analyze(path: PathBuf) -> FileSystemNode {
 
         FileSystemNode::new_directory(file_name, size, nodes)
     } else {
-        FileSystemNode::new_file(file_name, size)
+        FileSystemNode::new_file(file_name, metadata.len())
     }
 }
 
@@ -57,7 +46,7 @@ mod tests {
         fs::write(&file.path(), content).unwrap();
 
         // Act
-        let node = analyze(file.path().to_path_buf());
+        let node = analyze(file.path());
 
         // Assert
         assert_eq!(node.node_type(), NodeType::File);
@@ -70,7 +59,7 @@ mod tests {
         let directory = tempdir().unwrap();
 
         // Act
-        let node = analyze(directory.path().to_path_buf());
+        let node = analyze(directory.path());
 
         // Assert
         assert_eq!(node.size(), 0);
@@ -86,7 +75,7 @@ mod tests {
         fs::write(&file_with_contents.path(), "Hello, World!").unwrap();
 
         // Act
-        let node = analyze(directory.path().to_path_buf());
+        let node = analyze(directory.path());
 
         // Assert
         assert_eq!(node.node_type(), NodeType::Directory);
@@ -106,7 +95,7 @@ mod tests {
         ).unwrap();
 
         // Act
-        let node = analyze(directory.path().to_path_buf());
+        let node = analyze(directory.path());
 
         // Assert
         assert_eq!(node.size(), 6);
@@ -128,7 +117,7 @@ mod tests {
         fs::write(directory.path().join("sub/sub/f.txt"), "").unwrap();
 
         // Act
-        let node = analyze(directory.path().to_path_buf());
+        let node = analyze(directory.path());
 
         // Assert
         assert_eq!(node.node_type(), NodeType::Directory);
@@ -178,7 +167,7 @@ mod tests {
         fs::write(directory.path().join("e.txt"), "7777777").unwrap();
 
         // Act
-        let node = analyze(directory.path().to_path_buf());
+        let node = analyze(directory.path());
 
         // Assert
         let mut iterator = node.iter();
