@@ -1,6 +1,6 @@
+use crate::file_system_node::FileSystemNode;
+use std::path::Path;
 use std::{cmp::Reverse, fs};
-use std::path::{Path};
-use crate::analyzer::file_system_node::{FileSystemNode};
 
 pub fn analyze(path: &Path) -> FileSystemNode {
     let metadata = fs::metadata(&path).unwrap();
@@ -31,11 +31,11 @@ pub fn analyze(path: &Path) -> FileSystemNode {
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
+    use crate::file_system_analyzer::analyze;
+    use crate::file_system_node::{FileSystemNode, NodeType};
     use rstest::rstest;
-    use tempfile::{tempdir, NamedTempFile};
-    use crate::analyzer::file_system_analyzer::analyze;
-    use crate::analyzer::file_system_node::{FileSystemNode, NodeType};
+    use std::fs;
+    use tempfile::{NamedTempFile, tempdir};
 
     #[rstest]
     #[case("Hello", 5)]

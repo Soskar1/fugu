@@ -1,7 +1,7 @@
-use std::path::PathBuf;
 use clap::Parser;
-use fugu_core::analyzer::file_system_analyzer::analyze;
-use fugu_core::analyzer::file_system_node::{FileSystemNode, NodeType};
+use fugu_core::file_system_analyzer::analyze;
+use fugu_core::file_system_node::{FileSystemNode, NodeType};
+use std::path::PathBuf;
 use tree_printer::printable_tree_node::PrintableTreeNode;
 use tree_printer::tree_printer::get_tree_string;
 
@@ -80,10 +80,10 @@ impl PrintableTreeNode for DisplayableFileSystemNode {
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
-    use rstest::rstest;
-    use tempfile::NamedTempFile;
     use super::*;
+    use rstest::rstest;
+    use std::path::PathBuf;
+    use tempfile::NamedTempFile;
 
     #[test]
     #[should_panic]
