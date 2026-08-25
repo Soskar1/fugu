@@ -2,7 +2,7 @@ use std::{fs, path::PathBuf};
 use assert_cmd::Command;
 use tempfile::{TempDir, tempdir};
 
-const FUGU: &str = "fugu-cli";
+const FUGU: &str = "fugu";
 
 fn create_root_folder() -> (TempDir, PathBuf) {
     let temp= tempdir().unwrap();
